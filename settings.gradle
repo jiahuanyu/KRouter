@@ -1,0 +1,1 @@
+include ':app', ':krouter_compiler', ':krouter_annotation', ':krouter_api'
