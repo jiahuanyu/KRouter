@@ -2,6 +2,7 @@ package me.jiahuan.android.krouter.compiler
 
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.*
+import me.jiahuan.android.krouter.annotation.Consts
 import me.jiahuan.android.krouter.annotation.Route
 import me.jiahuan.android.krouter.annotation.RouteMeta
 import me.jiahuan.android.krouter.annotation.RouteType
@@ -76,12 +77,12 @@ class RouteProcessor : AbstractProcessor() {
                 )
             }
 
-            val typeIRouteLoader = TypeSpec.classBuilder("HAHAHA_$mModuleName")
-                .addSuperinterface(ClassName.bestGuess("me.jiahuan.android.krouter.api.IRouteLoader"))
+            val typeIRouteLoader = TypeSpec.classBuilder("${Consts.AUTO_GENERATOR_CLASS_PREFIX}$mModuleName")
+                .addSuperinterface(ClassName.bestGuess(Consts.IROUTELOADER_CLASS))
                 .addFunction(routeLoaderFunSpecBuild.build())
                 .build()
 
-            val kotlinFile = FileSpec.builder(Consts.PACKAGE, "HAHAHA_$mModuleName")
+            val kotlinFile = FileSpec.builder(Consts.PACKAGE, "${Consts.AUTO_GENERATOR_CLASS_PREFIX}$mModuleName")
                 .addType(typeIRouteLoader)
                 .build()
             val kaptKotlinGeneratedDir = processingEnv.options[Consts.KAPT_KOTLIN_GENERATED_OPTION_NAME]
