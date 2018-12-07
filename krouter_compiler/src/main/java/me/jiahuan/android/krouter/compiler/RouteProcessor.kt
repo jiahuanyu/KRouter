@@ -52,6 +52,9 @@ class RouteProcessor : AbstractProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
 
             val tmActivity = mElementUtil.getTypeElement(RouteType.ACTIVITY.className).asType()
+            val tmService = mElementUtil.getTypeElement(RouteType.SERVICE.className).asType()
+
+
             routeElements.forEach {
 
                 val routeAnn = it.getAnnotation(Route::class.java)
@@ -60,6 +63,10 @@ class RouteProcessor : AbstractProcessor() {
                     mTypeUtil.isSubtype(it.asType(), tmActivity) -> {
                         mLogger.info("found activity ")
                         RouteType.ACTIVITY
+                    }
+                    mTypeUtil.isSubtype(it.asType(), tmService) -> {
+                        mLogger.info("found service ")
+                        RouteType.SERVICE
                     }
                     else -> {
                         RouteType.UNKNOWN

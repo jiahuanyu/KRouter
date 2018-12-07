@@ -2,8 +2,11 @@ package me.jiahuan.android.krouter.api
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import me.jiahuan.android.krouter.annotation.Consts
 import me.jiahuan.android.krouter.annotation.RouteMeta
+import me.jiahuan.android.krouter.annotation.RouteType
 
 class KRouter private constructor() {
     companion object {
@@ -26,17 +29,54 @@ class KRouter private constructor() {
 
 
     class KRouterBuilder(val mPath: String) {
-        private lateinit var mContext: Context
+        private var mContext: Context? = null
+        private var mFlag: Int? = null
+        private var mBundle: Bundle? = null
 
         fun withContext(context: Context): KRouterBuilder {
             mContext = context
             return this
         }
 
+        fun withFlag(flag: Int): KRouterBuilder {
+            mFlag = flag
+            return this
+        }
+
+        fun withBundle(bundle: Bundle): KRouterBuilder {
+            mBundle = bundle
+            return this
+        }
+
         fun request() {
             val routeMeta = mRouteMap[mPath]
             if (routeMeta != null) {
-                mContext.startActivity(Intent(mContext, routeMeta.clazz))
+                when (routeMeta.routeType) {
+                    RouteType.ACTIVITY -> {
+                        mContext?.let { context ->
+                            val intent = Intent(context, routeMeta.clazz)
+                            mFlag?.let { flag ->
+                                intent.setFlags(flag)
+                            }
+                            mBundle?.let { bundle ->
+                                intent.putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        }
+                    }
+                    RouteType.SERVICE -> {
+                        mContext?.let { context ->
+                            val intent = Intent(context, routeMeta.clazz)
+                            mBundle?.let { bundle ->
+                                intent.putExtras(bundle)
+                            }
+                            context.startService(intent)
+                        }
+                    }
+                    else -> {
+                        Log.d(TAG, "else")
+                    }
+                }
             }
         }
     }

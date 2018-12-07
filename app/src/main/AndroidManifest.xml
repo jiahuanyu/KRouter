@@ -17,5 +17,7 @@
 
         <activity android:name=".SecondActivity"
                   android:screenOrientation="portrait"/>
+
+        <service android:name=".ThirdService" />
     </application>
 </manifest>
