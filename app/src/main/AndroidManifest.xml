@@ -19,5 +19,7 @@
                   android:screenOrientation="portrait"/>
 
         <service android:name=".ThirdService" />
+
+        <receiver android:name=".TestReceiver" />
     </application>
 </manifest>

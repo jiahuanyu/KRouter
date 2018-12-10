@@ -28,6 +28,12 @@ class MainActivity : AppCompatActivity() {
                 .withContext(this)
                 .withBundle(bundle)
                 .request()
+
+
+            KRouter.create("/main/receiver")
+                .withContext(this)
+                .withAction("hahahhahaa")
+                .request()
         }
     }
 }

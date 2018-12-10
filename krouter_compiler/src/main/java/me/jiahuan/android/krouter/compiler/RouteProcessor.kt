@@ -53,6 +53,7 @@ class RouteProcessor : AbstractProcessor() {
 
             val tmActivity = mElementUtil.getTypeElement(RouteType.ACTIVITY.className).asType()
             val tmService = mElementUtil.getTypeElement(RouteType.SERVICE.className).asType()
+            val tmReceiver = mElementUtil.getTypeElement(RouteType.RECEIVER.className).asType()
 
 
             routeElements.forEach {
@@ -67,6 +68,10 @@ class RouteProcessor : AbstractProcessor() {
                     mTypeUtil.isSubtype(it.asType(), tmService) -> {
                         mLogger.info("found service ")
                         RouteType.SERVICE
+                    }
+                    mTypeUtil.isSubtype(it.asType(), tmReceiver) -> {
+                        mLogger.info("found receiver ")
+                        RouteType.RECEIVER
                     }
                     else -> {
                         RouteType.UNKNOWN

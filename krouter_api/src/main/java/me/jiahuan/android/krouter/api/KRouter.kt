@@ -2,6 +2,7 @@ package me.jiahuan.android.krouter.api
 
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.util.Log
 import me.jiahuan.android.krouter.annotation.Consts
@@ -37,6 +38,9 @@ class KRouter private constructor() {
     class KRouterBuilder(private val mPath: String, private val mContext: Context) {
         private var mFlag: Int? = null
         private val mBundle = Bundle()
+        private var mServiceConnection: ServiceConnection? = null
+        private var mBindWithStartService = false
+        private var mIntentAction: String? = null
 
         fun withFlag(flag: Int): KRouterBuilder {
             mFlag = flag
@@ -58,11 +62,25 @@ class KRouter private constructor() {
             return this
         }
 
+        fun withServiceConnection(conn: ServiceConnection, startService: Boolean = false): KRouterBuilder {
+            mServiceConnection = conn
+            mBindWithStartService = startService
+            return this
+        }
+
+        fun withAction(action: String): KRouterBuilder {
+            mIntentAction = action
+            return this
+        }
+
         fun request() {
             val routeMeta = mRouteMap[mPath]
             if (routeMeta != null) {
                 val intent = Intent(mContext, routeMeta.clazz)
                 intent.putExtras(mBundle)
+                mIntentAction?.let {
+                    intent.action = it
+                }
                 when (routeMeta.routeType) {
                     RouteType.ACTIVITY -> {
                         mFlag?.let { flag ->
@@ -70,8 +88,20 @@ class KRouter private constructor() {
                         }
                         mContext.startActivity(intent)
                     }
+                    RouteType.RECEIVER -> {
+                        mContext.sendBroadcast(intent)
+                    }
                     RouteType.SERVICE -> {
-                        mContext.startService(intent)
+                        if (mServiceConnection != null) {
+                            mServiceConnection?.let {
+                                mContext.bindService(intent, it, Context.BIND_AUTO_CREATE)
+                                if (mBindWithStartService) {
+                                    mContext.startService(intent)
+                                }
+                            }
+                        } else {
+                            mContext.startService(intent)
+                        }
                     }
                     else -> {
                         Log.d(TAG, "else")
