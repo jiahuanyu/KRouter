@@ -14,8 +14,8 @@ class KRouter private constructor() {
 
         private val mRouteMap = HashMap<String, RouteMeta>()
 
-        fun create(path: String): KRouterBuilder {
-            return KRouterBuilder(path)
+        fun create(path: String): KRouterContextBuilder {
+            return KRouterContextBuilder(path)
         }
 
         fun initialize(vararg moduleName: String) {
@@ -28,15 +28,15 @@ class KRouter private constructor() {
     }
 
 
-    class KRouterBuilder(val mPath: String) {
-        private var mContext: Context? = null
-        private var mFlag: Int? = null
-        private var mBundle: Bundle? = null
-
+    class KRouterContextBuilder(private val mPath: String) {
         fun withContext(context: Context): KRouterBuilder {
-            mContext = context
-            return this
+            return KRouterBuilder(mPath, context)
         }
+    }
+
+    class KRouterBuilder(private val mPath: String, private val mContext: Context) {
+        private var mFlag: Int? = null
+        private val mBundle = Bundle()
 
         fun withFlag(flag: Int): KRouterBuilder {
             mFlag = flag
@@ -44,34 +44,34 @@ class KRouter private constructor() {
         }
 
         fun withBundle(bundle: Bundle): KRouterBuilder {
-            mBundle = bundle
+            mBundle.putAll(bundle)
+            return this
+        }
+
+        fun withString(key: String, value: String): KRouterBuilder {
+            mBundle.putString(key, value)
+            return this
+        }
+
+        fun withInt(key: String, value: Int): KRouterBuilder {
+            mBundle.putInt(key, value)
             return this
         }
 
         fun request() {
             val routeMeta = mRouteMap[mPath]
             if (routeMeta != null) {
+                val intent = Intent(mContext, routeMeta.clazz)
+                intent.putExtras(mBundle)
                 when (routeMeta.routeType) {
                     RouteType.ACTIVITY -> {
-                        mContext?.let { context ->
-                            val intent = Intent(context, routeMeta.clazz)
-                            mFlag?.let { flag ->
-                                intent.setFlags(flag)
-                            }
-                            mBundle?.let { bundle ->
-                                intent.putExtras(bundle)
-                            }
-                            context.startActivity(intent)
+                        mFlag?.let { flag ->
+                            intent.setFlags(flag)
                         }
+                        mContext.startActivity(intent)
                     }
                     RouteType.SERVICE -> {
-                        mContext?.let { context ->
-                            val intent = Intent(context, routeMeta.clazz)
-                            mBundle?.let { bundle ->
-                                intent.putExtras(bundle)
-                            }
-                            context.startService(intent)
-                        }
+                        mContext.startService(intent)
                     }
                     else -> {
                         Log.d(TAG, "else")
